@@ -1,6 +1,10 @@
 #include <iostream>
+#include "Genome.h"
+
+using namespace std;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    //Genome g;
+    //cout<<g.encode();
     return 0;
 }
