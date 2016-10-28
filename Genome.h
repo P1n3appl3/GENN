@@ -27,6 +27,8 @@ public:
 
     void recomputeInputs();
 
+    //deletes disabled connections
+    void clean();
 };
 
 

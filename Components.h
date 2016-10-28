@@ -25,8 +25,6 @@ public:
         weight = w;
         enabled = e;
     }
-
-    int id;
     bool enabled;
     Neuron *input;
     Neuron *output;

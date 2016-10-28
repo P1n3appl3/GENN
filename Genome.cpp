@@ -70,7 +70,7 @@ std::string Genome::encode() {
     }
     ss << totalConnections << ' ';
     for (int i = 0; i < totalConnections; i++) {
-        ss << structure[i]->id << ' ' << structure[i]->weight << ' ' << structure[i]->enabled << ' '
+        ss << structure[i]->weight << ' ' << structure[i]->enabled << ' '
            << structure[i]->input->id << ' ' << structure[i]->output->id << ' ';
     }
     for(int i=0;i<7;i++){
@@ -93,7 +93,6 @@ void Genome::decode(std::string s) {
     structure.resize(totalConnections);
     int temp;
     for (int i = 0; i < totalConnections; i++) {
-        ss >> structure[i]->id;
         ss >> structure[i]->weight;
         ss >> structure[i]->enabled;
         ss >> temp;
