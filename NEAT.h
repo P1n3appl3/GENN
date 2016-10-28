@@ -1,9 +1,8 @@
-#ifndef GENN_NETWORK_H
-#define GENN_NETWORK_H
+#ifndef GENN_NEAT_H
+#define GENN_NEAT_H
 
 #include <time.h>
 #include <cstdlib>
-#include <vector>
 #include "Genome.h"
 
 class NEAT {

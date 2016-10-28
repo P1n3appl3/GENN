@@ -1,5 +1,5 @@
-#ifndef GENN_NETWORK_H
-#define GENN_NETWORK_H
+#ifndef GENN_GENOME_H
+#define GENN_GENOME_H
 
 #include "Components.h"
 #include "math.h"

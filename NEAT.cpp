@@ -40,14 +40,14 @@ bool NEAT::innovationExists(int a, int b) {
 
 void NEAT::mutate(Genome &g) {
     if (double(rand()) / RAND_MAX < g.mutationRates[ENABLEMUTATE]) {
-        g.structure[rand() % g.totalConnections].enabled = !g.structure[rand() % g.totalConnections].enabled;
+        g.structure[rand() % g.totalConnections]->enabled = !g.structure[rand() % g.totalConnections]->enabled;
     }
     if (double(rand()) / RAND_MAX < g.mutationRates[WEIGHTMUTATE]) {
         for (int i = 0; i < g.totalConnections; i++) {
             if (rand() / RAND_MAX < g.mutationRates[PERTURBMUTATE]) {
-                g.structure[i].weight += ((rand() % 2) * 2 - 1) * g.mutationRates[STEPSIZE];
+                g.structure[i]->weight += ((rand() % 2) * 2 - 1) * g.mutationRates[STEPSIZE];
             } else {
-                g.structure[i].weight = double(rand()) * 4. / RAND_MAX - 2;
+                g.structure[i]->weight = double(rand()) * 4. / RAND_MAX - 2;
             }
         }
     }
