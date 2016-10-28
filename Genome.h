@@ -1,21 +1,21 @@
 #ifndef GENN_NETWORK_H
 #define GENN_NETWORK_H
 
-#include "Connection.h"
+#include "Components.h"
 #include "math.h"
 #include <sstream>
 #include <stdlib.h>
 
 class Genome {
-private:
-    Connection *structure[];
-    Neuron *nodes[];
+public:
+    std::vector<Connection *> structure;
+    std::vector<Neuron *> nodes;
     int inputs, outputs, totalNodes, totalConnections;
+    double mutationRates[7];
 
     double sigmoid(double);
 
-public:
-    Genome();
+    Genome(Genome*);
 
     Genome(int, int);
 
@@ -24,6 +24,9 @@ public:
     std::string encode();
 
     void decode(std::string);
+
+    void recomputeInputs();
+
 };
 
 
