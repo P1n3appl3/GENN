@@ -2,6 +2,7 @@
 #define GENN_COMPONENTS_H
 
 #include <vector>
+
 class Connection;
 class Neuron {
 public:

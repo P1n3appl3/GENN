@@ -15,7 +15,7 @@ public:
 
     double sigmoid(double);
 
-    Genome(Genome*);
+    Genome(Genome&);
 
     Genome(int, int);
 

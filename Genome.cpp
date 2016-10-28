@@ -8,10 +8,10 @@
 #define NODEMUTATE 5
 #define CROSSOVER 6
 
-Genome::Genome(Genome *g) {
-    std::copy(std::begin(g->structure),std::end(g->structure),structure);
-    std::copy(std::begin(g->nodes),std::end(g->nodes),nodes);
-    std::copy(std::begin(g->mutationRates),std::end(g->mutationRates),mutationRates);
+Genome::Genome(Genome &g) {
+    structure = g.structure;
+    nodes = g.nodes;
+    std::copy(std::begin(g.mutationRates),std::end(g.mutationRates),mutationRates);
 }
 
 Genome::Genome(int a, int b) {
