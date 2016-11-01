@@ -3,17 +3,40 @@
 
 #include <time.h>
 #include <cstdlib>
+#include <array>
 #include "Genome.h"
 
 class NEAT {
 private:
-    std::vector<int[2]> innovation;
+    std::vector<std::array<int, 2>> innovation;
+
+    std::vector<std::vector<Genome *>> species;
+
+    std::vector<int> staleness;
+
+    int population, staleGenome;
+
+    double c1, c2, c3, distanceThreshold;
 
 public:
     NEAT(int inputs, int outputs);
 
-    //after 20 genomes of no gain in fitness, only breed top species
-    void mate(Genome &, Genome &);
+    ~NEAT();
+
+    void config(); //for setting constants like gen size and mutation rates
+
+    void cull();
+
+    std::string status();
+
+    void separate();
+
+    std::string log();
+
+    double distance(Genome *, Genome *);
+
+    //staleness hurts chances unless at the top
+    Genome *mate(Genome *, Genome *);
 
     bool innovationExists(int a, int b);
 
@@ -21,8 +44,11 @@ public:
 
     void mutate(Genome &);
 
-    void config(); //for setting constants like gen size and mutation rates
-    void run();//maybe give parameters for stopping? PUT IN SIMULATION ABSTRACT
+    std::vector<Genome *> pool;
+
+    void repopulate();
+
+    void nextGen();
 };
 /*
  * encode as b64 string?

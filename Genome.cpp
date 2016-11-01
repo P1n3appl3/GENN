@@ -1,20 +1,13 @@
 #include "Genome.h"
 
-#define WEIGHTMUTATE 0
-#define PERTURBMUTATE 1
-#define ENABLEMUTATE 2
-#define STEPSIZE 3
-#define LINKMUTATE 4
-#define NODEMUTATE 5
-#define CROSSOVER 6
 
 Genome::Genome(Genome &g) {
     structure = g.structure;
     nodes = g.nodes;
-    std::copy(std::begin(g.mutationRates),std::end(g.mutationRates),mutationRates);
+    std::copy(std::begin(g.mutationRates), std::end(g.mutationRates), mutationRates);
 }
 
-Genome::Genome(int a, int b) {
+Genome::Genome(int a, int b, double m[]) {
     totalNodes = a + b;
     inputs = a;
     outputs = b;
@@ -33,13 +26,9 @@ Genome::Genome(int a, int b) {
     for (int i = 0; i < b; i++) {
         nodes[i] = new Neuron(i + a, 0);
     }
-    mutationRates[WEIGHTMUTATE]=.25;
-    mutationRates[PERTURBMUTATE]=.9;
-    mutationRates[ENABLEMUTATE]=.4;
-    mutationRates[STEPSIZE]=.1;
-    mutationRates[LINKMUTATE]=.5;
-    mutationRates[NODEMUTATE]=.5;
-    mutationRates[CROSSOVER]=.75;
+    for (int i = 0; i < 8; i++) {
+        mutationRates[i] = m[i];
+    }
     recomputeInputs();
 }
 
@@ -50,7 +39,8 @@ double *Genome::propagate(double *a) {
     for (int i = inputs - 1; i < totalNodes; i++) {
         nodes[i]->sum = 0;
         for (int j = 0; j < nodes[i]->inputs.size(); j++) {
-            nodes[i]->sum += nodes[i]->inputs[j]->input->value * nodes[i]->inputs[j]->weight * int(nodes[i]->inputs[j]->enabled);
+            nodes[i]->sum +=
+                    nodes[i]->inputs[j]->input->value * nodes[i]->inputs[j]->weight * int(nodes[i]->inputs[j]->enabled);
         }
         nodes[i]->value = sigmoid(nodes[i]->sum);
     }
@@ -73,8 +63,8 @@ std::string Genome::encode() {
         ss << structure[i]->weight << ' ' << structure[i]->enabled << ' '
            << structure[i]->input->id << ' ' << structure[i]->output->id << ' ';
     }
-    for(int i=0;i<7;i++){
-        ss<<mutationRates[i]<<' ';
+    for (int i = 0; i < 7; i++) {
+        ss << mutationRates[i] << ' ';
     }
     return ss.str();
 }
@@ -110,8 +100,8 @@ void Genome::decode(std::string s) {
             }
         }
     }
-    for(int i=0;i<7;i++){
-        ss>>mutationRates[i];
+    for (int i = 0; i < 7; i++) {
+        ss >> mutationRates[i];
     }
     recomputeInputs();
 }
@@ -123,6 +113,24 @@ void Genome::recomputeInputs() {
                 nodes[i]->inputs.push_back(structure[j]);
             }
         }
+    }
+}
+
+bool Genome::hasConnection(int a, int b) {
+    for (int i = 0; i < structure.size(); i++) {
+        if (structure[i]->input->id == structure[i]->output->id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Genome::~Genome() {
+    for (int i = 0; i < structure.size(); i++) {
+        delete structure[i];
+    }
+    for (int i = 0; i < nodes.size(); i++) {
+        delete nodes[i];
     }
 }
 

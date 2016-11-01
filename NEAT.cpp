@@ -10,25 +10,58 @@
 
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
+    double m[7];
+    population = 150;
+    m[WEIGHTMUTATE] = .8;
+    m[PERTURBMUTATE] = .9;
+    m[ENABLEMUTATE] = .02;
+    m[STEPSIZE] = .1;
+    m[LINKMUTATE] = .05;
+    m[NODEMUTATE] = .03;
+    m[CROSSOVER] = .75;
+    c1 = 1;
+    c2 = 1;
+    c3 = .4;
+    staleGenome = 15;
+    distanceThreshold = 3;
+    for (int i = 0; i < population; i++) {
+        pool.push_back(new Genome(inputs, outputs, m));
+    }
+    species[0] = pool;
 }
 
-void NEAT::mate(Genome &a, Genome &b) {
+Genome *NEAT::mate(Genome *a, Genome *b) {
+    if (b->fitness > a->fitness) {
+        Genome *temp = a;
+        a = b;
+        b = temp;
+    }
+    Genome *child = new Genome(*a);
+    if (double(rand()) / RAND_MAX < child->mutationRates[CROSSOVER]) {
+        for (int i = 0; i < a->structure.size(); i++) {
+            double newWeight = a->structure[i]->weight;
+            for (int j = 0; j < b->structure.size(); j++) {
+                if (b->structure[j]->input->id == a->structure[i]->input->id &&
+                    b->structure[j]->output->id == a->structure[i]->output->id) {
+                    child->structure[i]->weight = (newWeight + a->structure[j]->weight) / 2;
 
+                }
+            }
+        }
+    }
+    mutate(*child);
+    return child;
 }
 
 void NEAT::config() {
 
 }
 
-void NEAT::run() {
-
-}
-
 //doesn't check if combination exists, must check innovationExists() before
 int NEAT::newInnovation(int a, int b) {
-    int temp[2] = {a,b};
+    std::array<int, 2> temp = {a, b};
     innovation.push_back(temp);
-    return innovation.size()-1;
+    return innovation.size() - 1;
 }
 
 bool NEAT::innovationExists(int a, int b) {
@@ -59,8 +92,7 @@ void NEAT::mutate(Genome &g) {
     if (double(rand()) / RAND_MAX < g.mutationRates[NODEMUTATE]) {
         int a = rand() % g.totalNodes;
         int b = rand() % (g.totalNodes - g.inputs);
-        if (!innovationExists(a, b)) {
-            newInnovation(a, b);
+        if (!g.hasConnection(a, b)) {
             Neuron *tempStart = NULL;
             Neuron *tempEnd = NULL;
             for (int i = 0; i < g.nodes.size(); i++) {
@@ -76,27 +108,64 @@ void NEAT::mutate(Genome &g) {
     }
     //ADD NODE
     if (double(rand()) / RAND_MAX < g.mutationRates[WEIGHTMUTATE]) {
-        Connection* temp = g.structure[rand()%g.totalConnections];
-        temp->enabled=false;
+        Connection *temp = g.structure[rand() % g.totalConnections];
+        temp->enabled = false;
         int newNodeID = 0;
-        for(int i=0;i<g.totalNodes;i++){
-            if(g.nodes[i]->id>newNodeID){
-                newNodeID=g.nodes[i]->id;
+        for (int i = 0; i < g.totalNodes; i++) {
+            if (g.nodes[i]->id > newNodeID) {
+                newNodeID = g.nodes[i]->id;
             }
         }
-        Neuron* newNode = new Neuron(newNodeID+1);
+        Neuron *newNode = new Neuron(newNodeID + 1);
         g.nodes.push_back(newNode);
-        g.structure.push_back(new Connection(temp->input,newNode,1));
-        g.structure.push_back(new Connection(temp->input,newNode,temp->weight));
-        if(!innovationExists(temp->input->id,newNode->id)){
-            newInnovation(temp->input->id,newNode->id);
-        }
-        if(!innovationExists(newNode->id,temp->output->id)){
-            newInnovation(newNode->id,temp->output->id);
-        }
+        g.structure.push_back(new Connection(temp->input, newNode, 1));
+        g.structure.push_back(new Connection(temp->input, newNode, temp->weight));
     }
     //slightly alter all mutation rates (.05 is the volatility)
     for (int i = 0; i < 7; i++) {
         g.mutationRates[i] += ((rand() % 2) * 2 - 1) * .05 * g.mutationRates[i];
+    }
+}
+
+double NEAT::distance(Genome *a, Genome *b) {
+    if (b->structure.size() > a->structure.size()) {
+        Genome *temp = a;
+        a = b;
+        b = temp;
+    }
+    int disjoint = b->structure.size();
+    int n = a->structure.size();
+    double sum = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < b->structure.size(); j++) {
+            if (a->structure[i]->input->id == b->structure[j]->input->id &&
+                a->structure[i]->output->id == b->structure[j]->output->id) {
+                sum += fabs(a->structure[i]->weight - b->structure[j]->weight);
+                disjoint--;
+                break;
+            }
+        }
+    }
+    return c1 * disjoint / n + c2 * (n - b->structure.size()) + c3 * sum / (b->structure.size() - disjoint);
+}
+
+void NEAT::separate() {
+
+}
+
+void NEAT::repopulate() {
+
+}
+
+void NEAT::nextGen() {
+    separate();
+    cull();
+    repopulate();
+    log();
+}
+
+NEAT::~NEAT() {
+    for (int i = 0; i < pool.size(); i++) {
+        delete pool[i];
     }
 }

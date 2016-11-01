@@ -1,14 +1,10 @@
 #include <iostream>
-#include <time.h>
-#include <cstdlib>
 
 using namespace std;
 
 int main() {
-    srand(time(NULL));
-    for(int i=0;i<10;i++) {
-        double n = (rand()) * 4. / RAND_MAX - 2;
-        cout << n<<endl;
-    }
+    int a=5;
+    double b = 6;
+    cout<<b/a;
     return 0;
 }

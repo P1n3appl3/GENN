@@ -10,14 +10,16 @@ class Genome {
 public:
     std::vector<Connection *> structure;
     std::vector<Neuron *> nodes;
-    int inputs, outputs, totalNodes, totalConnections;
+    int inputs, outputs, totalNodes, totalConnections, fitness;
     double mutationRates[7];
 
     double sigmoid(double);
 
     Genome(Genome&);
 
-    Genome(int, int);
+    Genome(int, int, double[]);
+
+    ~Genome();
 
     double *propagate(double *);
 
@@ -26,6 +28,8 @@ public:
     void decode(std::string);
 
     void recomputeInputs();
+
+    bool hasConnection(int, int);
 
     //deletes disabled connections
     void clean();
