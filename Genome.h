@@ -10,12 +10,13 @@ class Genome {
 public:
     std::vector<Connection *> structure;
     std::vector<Neuron *> nodes;
-    int inputs, outputs, totalNodes, totalConnections, fitness;
+    int inputs, outputs, totalNodes, totalConnections;
     double mutationRates[7];
+    double fitness;
 
     double sigmoid(double);
 
-    Genome(Genome&);
+    Genome(Genome &);
 
     Genome(int, int, double[]);
 
@@ -30,6 +31,11 @@ public:
     void recomputeInputs();
 
     bool hasConnection(int, int);
+
+    //Backwards to put most fit genomes first in species
+    bool operator<(const Genome &g) {
+        return (fitness > g.fitness);
+    }
 
     //deletes disabled connections
     void clean();

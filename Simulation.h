@@ -13,7 +13,7 @@ public:
         NEAT controller(a, b);
         while (!done) {
             for (int i = 0; i < controller.pool.size(); i++) {
-                evaluate(controller.pool[i]);
+                evaluate(*controller.pool[i]);
             }
             controller.nextGen();
             std::cout<<controller.status();

@@ -22,12 +22,11 @@ NEAT::NEAT(int inputs, int outputs) {
     c1 = 1;
     c2 = 1;
     c3 = .4;
-    staleGenome = 15;
+    staleThreshold = 15;
     distanceThreshold = 3;
     for (int i = 0; i < population; i++) {
         pool.push_back(new Genome(inputs, outputs, m));
     }
-    species[0] = pool;
 }
 
 Genome *NEAT::mate(Genome *a, Genome *b) {
@@ -51,10 +50,6 @@ Genome *NEAT::mate(Genome *a, Genome *b) {
     }
     mutate(*child);
     return child;
-}
-
-void NEAT::config() {
-
 }
 
 //doesn't check if combination exists, must check innovationExists() before
@@ -146,10 +141,45 @@ double NEAT::distance(Genome *a, Genome *b) {
             }
         }
     }
-    return c1 * disjoint / n + c2 * (n - b->structure.size()) + c3 * sum / (b->structure.size() - disjoint);
+    return std::abs(c1 * disjoint / n + c2 * (n - b->structure.size()) + c3 * sum / (b->structure.size() - disjoint));
 }
 
-void NEAT::separate() {
+void NEAT::classify() {
+    std::sort(std::begin(pool),std::end(pool));
+    for(int i=0;i<pool.size();i++) {
+        bool newSpecies = true;
+        for(int j=0;j<species.size();j++){
+            if(distance(pool[i], species[j].genomes[0])<distanceThreshold){
+                newSpecies = false;
+                species[j].genomes.push_back(pool[i]);
+            }
+        }
+        if(newSpecies){
+            species.push_back(Species());
+            species.back().genomes.push_back(pool[i]);
+        }
+    }
+    for(int i=0;i<species.size();i++) {
+        species[i].size = species[i].genomes.size();
+    }
+}
+
+void NEAT::adjustedFitness() {
+    for(int i=0;i<species.size();i++){
+        if(species[i].genomes[0]->fitness > species[i].maxFitness){
+            species[i].maxFitness = species[i].genomes[0]->fitness;
+            species[i].staleness = 0;
+        }
+        else{
+            species[i].staleness++;
+        }
+        for(int j=0;j<species[i].genomes.size();j++){
+            species[i].genomes[j]->fitness/=species[i].genomes.size();
+        }
+    }
+}
+
+void NEAT::cull() {
 
 }
 
@@ -158,7 +188,8 @@ void NEAT::repopulate() {
 }
 
 void NEAT::nextGen() {
-    separate();
+    classify();
+    adjustedFitness();
     cull();
     repopulate();
     log();
@@ -169,3 +200,15 @@ NEAT::~NEAT() {
         delete pool[i];
     }
 }
+
+
+
+std::string NEAT::log() {
+    return "";
+}
+
+std::string NEAT::status() {
+    return "";
+}
+
+

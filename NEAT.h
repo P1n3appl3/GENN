@@ -4,17 +4,24 @@
 #include <time.h>
 #include <cstdlib>
 #include <array>
+#include <algorithm>
 #include "Genome.h"
+
+class Species{
+public:
+    std::vector<Genome *> genomes;
+    int staleness = 0;
+    double maxFitness = 0;
+    int size = 0;
+};
 
 class NEAT {
 private:
     std::vector<std::array<int, 2>> innovation;
 
-    std::vector<std::vector<Genome *>> species;
+    std::vector<Species> species;
 
-    std::vector<int> staleness;
-
-    int population, staleGenome;
+    int population, staleThreshold;
 
     double c1, c2, c3, distanceThreshold;
 
@@ -25,11 +32,13 @@ public:
 
     void config(); //for setting constants like gen size and mutation rates
 
+    void classify();
+
     void cull();
 
     std::string status();
 
-    void separate();
+    void adjustedFitness();
 
     std::string log();
 
