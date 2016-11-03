@@ -134,3 +134,9 @@ Genome::~Genome() {
     }
 }
 
+void Genome::reset() {
+    for(int i=0;i<nodes.size();i++){
+        nodes[i]->value=0;
+    }
+}
+

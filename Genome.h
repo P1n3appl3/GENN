@@ -12,7 +12,7 @@ public:
     std::vector<Neuron *> nodes;
     int inputs, outputs, totalNodes, totalConnections;
     double mutationRates[7];
-    double fitness;
+    double fitness = 0;
 
     double sigmoid(double);
 
@@ -31,6 +31,8 @@ public:
     void recomputeInputs();
 
     bool hasConnection(int, int);
+
+    void reset();
 
     //Backwards to put most fit genomes first in species
     bool operator<(const Genome &g) {

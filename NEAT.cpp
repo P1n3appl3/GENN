@@ -24,6 +24,7 @@ NEAT::NEAT(int inputs, int outputs) {
     c3 = .4;
     staleThreshold = 15;
     distanceThreshold = 3;
+    generation = 0;
     for (int i = 0; i < population; i++) {
         pool.push_back(new Genome(inputs, outputs, m));
     }
@@ -145,54 +146,73 @@ double NEAT::distance(Genome *a, Genome *b) {
 }
 
 void NEAT::classify() {
-    std::sort(std::begin(pool),std::end(pool));
-    for(int i=0;i<pool.size();i++) {
+    std::sort(std::begin(pool), std::end(pool));
+    for (int i = 0; i < pool.size(); i++) {
         bool newSpecies = true;
-        for(int j=0;j<species.size();j++){
-            if(distance(pool[i], species[j].genomes[0])<distanceThreshold){
+        for (int j = 0; j < species.size(); j++) {
+            if (distance(pool[i], species[j].genomes[0]) < distanceThreshold) {
                 newSpecies = false;
                 species[j].genomes.push_back(pool[i]);
             }
         }
-        if(newSpecies){
+        if (newSpecies) {
             species.push_back(Species());
             species.back().genomes.push_back(pool[i]);
         }
     }
-    for(int i=0;i<species.size();i++) {
-        species[i].size = species[i].genomes.size();
-    }
 }
 
 void NEAT::adjustedFitness() {
-    for(int i=0;i<species.size();i++){
-        if(species[i].genomes[0]->fitness > species[i].maxFitness){
+    for (int i = 0; i < species.size(); i++) {
+        if (species[i].genomes[0]->fitness > species[i].maxFitness) {
             species[i].maxFitness = species[i].genomes[0]->fitness;
             species[i].staleness = 0;
-        }
-        else{
+        } else {
             species[i].staleness++;
         }
-        for(int j=0;j<species[i].genomes.size();j++){
-            species[i].genomes[j]->fitness/=species[i].genomes.size();
+        for (int j = 0; j < species[i].genomes.size(); j++) {
+            species[i].genomes[j]->fitness /= species[i].genomes.size();
         }
     }
 }
 
 void NEAT::cull() {
-
+    for (int i = 0; i < species.size(); i++) {
+        if (species[i].staleness >= staleThreshold) {
+            species.erase(species.begin() + i);
+            i--;
+        }
+    }
 }
 
 void NEAT::repopulate() {
-
+    std::vector<Genome *> newPool;
+    for (int i = 0; i < species.size(); i++) {
+        for (int j = 0; j < species[i].genomes.size(); j++) {
+            if (rand() % 1000 == 1) {
+                newPool.push_back(mate(species[i].genomes[rand() % (species[i].genomes.size() / 2)],
+                                       species[i].genomes[rand() % (species[i].genomes.size() / 2)]));
+            } else {
+                int temp = rand() % species.size();
+                newPool.push_back(mate(species[i].genomes[rand() % (species[i].genomes.size() / 2)],
+                                       species[temp].genomes[rand() % (species[temp].genomes.size() / 2)]));
+            }
+        }
+    }
+    for (int i = 0; i < pool.size(); i++) {
+        delete pool[i];
+    }
+    pool = newPool;
 }
 
 void NEAT::nextGen() {
     classify();
+    log();
+    status();
     adjustedFitness();
     cull();
     repopulate();
-    log();
+    generation++;
 }
 
 NEAT::~NEAT() {
@@ -202,13 +222,25 @@ NEAT::~NEAT() {
 }
 
 
-
-std::string NEAT::log() {
-    return "";
+void NEAT::log() {
+    std::ofstream f("log.txt");
+    f << "Gen: " << generation << std::endl;
+    f << "Max Fitness: " << species[0].maxFitness << std::endl;
+    f << "Champion: " << species[0].genomes[0]->encode() << std::endl;
 }
 
-std::string NEAT::status() {
-    return "";
+void NEAT::status() {
+    int averageSize = 0;
+    int averageFitness = 0;
+    for (int i = 0; i < pool.size(); i++) {
+        averageSize += pool[i]->structure.size();
+        averageFitness += pool[i]->fitness;
+    }
+    averageSize /= pool.size();
+    averageFitness /= pool.size();
+    std::cout << "Gen: " << std::endl << generation << "Max Fitness: " << pool[0]->fitness << std::endl
+              << "Average Fitness: " << averageFitness << std::endl << "Average Size: " << averageSize << std::endl
+              << std::endl;
 }
 
 

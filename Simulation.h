@@ -2,21 +2,29 @@
 #define GENN_SIMULATION_H
 
 
-#include <iostream>
 #include "NEAT.h"
+#include <iostream>
 
 class Simulation {
 public:
+    NEAT* controller;
     virtual void evaluate(Genome&)=0;
-    Simulation(int a, int b) {
+    virtual void view(Genome*)=0;
+    void run(){
         bool done = false;
-        NEAT controller(a, b);
         while (!done) {
-            for (int i = 0; i < controller.pool.size(); i++) {
-                evaluate(*controller.pool[i]);
+            for (int i = 0; i < controller->pool.size(); i++) {
+                evaluate(*controller->pool[i]);
             }
-            controller.nextGen();
-            std::cout<<controller.status();
+            controller->nextGen();
+            std::cin>>done;
+        }
+        for (int i = 0; i < controller->pool.size(); i++) {
+            evaluate(*controller->pool[i]);
+        }
+        done = false;
+        while (!done) {
+            view(controller->pool[0]);
             std::cin>>done;
         }
     }

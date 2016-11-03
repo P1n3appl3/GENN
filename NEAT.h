@@ -1,18 +1,20 @@
 #ifndef GENN_NEAT_H
 #define GENN_NEAT_H
 
+#include "Genome.h"
 #include <time.h>
 #include <cstdlib>
 #include <array>
 #include <algorithm>
-#include "Genome.h"
+#include <fstream>
+#include <iostream>
+
 
 class Species{
 public:
     std::vector<Genome *> genomes;
     int staleness = 0;
     double maxFitness = 0;
-    int size = 0;
 };
 
 class NEAT {
@@ -21,7 +23,7 @@ private:
 
     std::vector<Species> species;
 
-    int population, staleThreshold;
+    int population, staleThreshold, generation;
 
     double c1, c2, c3, distanceThreshold;
 
@@ -36,11 +38,11 @@ public:
 
     void cull();
 
-    std::string status();
+    void status();
 
     void adjustedFitness();
 
-    std::string log();
+    void log();
 
     double distance(Genome *, Genome *);
 
@@ -59,27 +61,5 @@ public:
 
     void nextGen();
 };
-/*
- * encode as b64 string?
- * bias is an always on node in the input layer
- * parser for reading/writing networks to files
-
-  while(true){
-    for(each genome){
-        initialize simulation
-        while(!terminationcondition){
-            get network inputs from simulation
-            compute network outputs
-            feed network outputs to simulation's update method
-        }
-        score network fitness
-       }
-    breed
-    mutate (link, node, enable, weight)
-    generation++
-    log stats
-    display data
-  }
- * */
 
 #endif //GENN_NETWORK_H

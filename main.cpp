@@ -1,10 +1,10 @@
 #include <iostream>
+#include "problems/Xor.h"
 
 using namespace std;
 
 int main() {
-    int a=5;
-    double b = 6;
-    cout<<b/a;
-    return 0;
+    Xor* test = new Xor();
+    test->run();
+    cout<<"Done";
 }
