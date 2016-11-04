@@ -10,7 +10,7 @@
 #include <iostream>
 
 
-class Species{
+class Species {
 public:
     std::vector<Genome *> genomes;
     int staleness = 0;

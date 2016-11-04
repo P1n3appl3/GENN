@@ -1,10 +1,10 @@
 #ifndef GENN_GENOME_H
 #define GENN_GENOME_H
 
-#include "Components.h"
 #include "math.h"
 #include <sstream>
 #include <stdlib.h>
+#include "Components.h"
 
 class Genome {
 public:
@@ -16,13 +16,13 @@ public:
 
     double sigmoid(double);
 
-    Genome(Genome &);
+    Genome(std::string);
 
     Genome(int, int, double[]);
 
     ~Genome();
 
-    double *propagate(double *);
+    void propagate(double *, double *);
 
     std::string encode();
 
@@ -36,7 +36,7 @@ public:
 
     //Backwards to put most fit genomes first in species
     bool operator<(const Genome &g) {
-        return (fitness > g.fitness);
+        return (fitness < g.fitness);
     }
 
     //deletes disabled connections

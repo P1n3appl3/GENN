@@ -1,30 +1,33 @@
 #include "Genome.h"
 
 
-Genome::Genome(Genome &g) {
-    structure = g.structure;
-    nodes = g.nodes;
-    std::copy(std::begin(g.mutationRates), std::end(g.mutationRates), mutationRates);
+Genome::Genome(std::string g) {
+    decode(g);
+//    structure = g.structure;
+//    nodes = g.nodes;
+//    totalNodes = g.totalNodes;
+//    totalConnections = g.totalConnections;
+//    inputs = g.inputs;
+//    outputs = g.outputs;
+//    std::copy(std::begin(g.mutationRates), std::end(g.mutationRates), mutationRates);
 }
 
 Genome::Genome(int a, int b, double m[]) {
     totalNodes = a + b;
     inputs = a;
     outputs = b;
-    nodes.resize(totalNodes);
     totalConnections = a * b;
-    structure.resize(totalConnections);
+    for (int i = 0; i < a; i++) {
+        nodes.push_back(new Neuron(i, 0));
+    }
+    for (int i = 0; i < b; i++) {
+        nodes.push_back(new Neuron(i + a, 1));
+    }
     for (int i = 0; i < inputs; i++) {
         for (int j = 0; j < outputs; j++) {
             //Initializes all connections with random weight 0-2
-            structure[i * j] = new Connection(nodes[i], nodes[j], double(rand()) * 4. / RAND_MAX - 2);
+            structure.push_back(new Connection(nodes[i], nodes[inputs+j], double(rand()) * 4. / RAND_MAX - 2));
         }
-    }
-    for (int i = 0; i < a; i++) {
-        nodes[i] = new Neuron(i, 0);
-    }
-    for (int i = 0; i < b; i++) {
-        nodes[i] = new Neuron(i + a, 0);
     }
     for (int i = 0; i < 8; i++) {
         mutationRates[i] = m[i];
@@ -32,7 +35,7 @@ Genome::Genome(int a, int b, double m[]) {
     recomputeInputs();
 }
 
-double *Genome::propagate(double *a) {
+void Genome::propagate(double *a, double *b) {
     for (int i = 0; i < inputs; i++) {
         nodes[i]->value = a[i];
     }
@@ -44,6 +47,9 @@ double *Genome::propagate(double *a) {
         }
         nodes[i]->value = sigmoid(nodes[i]->sum);
     }
+    for (int i = 0; i < outputs; i++) {
+        b[i] = nodes[inputs + i]->value;
+    }
 }
 
 double Genome::sigmoid(double a) {
@@ -52,7 +58,7 @@ double Genome::sigmoid(double a) {
 
 std::string Genome::encode() {
     //writes to a space delimited string with the format:
-    //totalNodes inputs outputs nodeN.id nodeN.type totalConnections conN.id conN.weight conN.input conN.output
+    //totalNodes inputs outputs nodeN.id nodeN.type totalConnections conN.weight conN.enabled conN.input conN.output mutationN
     std::ostringstream ss;
     ss << totalNodes << ' ' << inputs << ' ' << outputs << ' ';
     for (int i = 0; i < totalNodes; i++) {
@@ -76,13 +82,16 @@ void Genome::decode(std::string s) {
     ss >> outputs;
     nodes.resize(totalNodes);
     for (int i = 0; i < totalNodes; i++) {
-        ss >> nodes[i]->id;
-        ss >> nodes[i]->type;
+        int tempid, temptype;
+        ss >> tempid;
+        ss >> temptype;
+        nodes[i] = new Neuron(tempid, temptype);
     }
     ss >> totalConnections;
     structure.resize(totalConnections);
     int temp;
     for (int i = 0; i < totalConnections; i++) {
+        structure[i] = new Connection();
         ss >> structure[i]->weight;
         ss >> structure[i]->enabled;
         ss >> temp;
@@ -135,8 +144,8 @@ Genome::~Genome() {
 }
 
 void Genome::reset() {
-    for(int i=0;i<nodes.size();i++){
-        nodes[i]->value=0;
+    for (int i = 0; i < nodes.size(); i++) {
+        nodes[i]->value = 0;
     }
 }
 

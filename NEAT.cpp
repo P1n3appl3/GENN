@@ -36,15 +36,14 @@ Genome *NEAT::mate(Genome *a, Genome *b) {
         a = b;
         b = temp;
     }
-    Genome *child = new Genome(*a);
+    Genome *child = new Genome(a->encode());
     if (double(rand()) / RAND_MAX < child->mutationRates[CROSSOVER]) {
-        for (int i = 0; i < a->structure.size(); i++) {
+        for (int i = 0; i < a->totalConnections; i++) {
             double newWeight = a->structure[i]->weight;
-            for (int j = 0; j < b->structure.size(); j++) {
+            for (int j = 0; j < b->totalConnections; j++) {
                 if (b->structure[j]->input->id == a->structure[i]->input->id &&
                     b->structure[j]->output->id == a->structure[i]->output->id) {
-                    child->structure[i]->weight = (newWeight + a->structure[j]->weight) / 2;
-
+                    child->structure[i]->weight = (newWeight + b->structure[j]->weight) / 2;
                 }
             }
         }
@@ -72,7 +71,8 @@ bool NEAT::innovationExists(int a, int b) {
 void NEAT::mutate(Genome &g) {
     //ENABLE
     if (double(rand()) / RAND_MAX < g.mutationRates[ENABLEMUTATE]) {
-        g.structure[rand() % g.totalConnections]->enabled = !g.structure[rand() % g.totalConnections]->enabled;
+        int temp = rand() % g.totalConnections;
+        g.structure[temp]->enabled = !g.structure[temp]->enabled;
     }
     //WEIGHTS
     for (int i = 0; i < g.totalConnections; i++) {
@@ -85,13 +85,13 @@ void NEAT::mutate(Genome &g) {
         }
     }
     //ADD CONNECTION
-    if (double(rand()) / RAND_MAX < g.mutationRates[NODEMUTATE]) {
+    if (double(rand()) / RAND_MAX < g.mutationRates[LINKMUTATE]) {
         int a = rand() % g.totalNodes;
         int b = rand() % (g.totalNodes - g.inputs);
         if (!g.hasConnection(a, b)) {
             Neuron *tempStart = NULL;
             Neuron *tempEnd = NULL;
-            for (int i = 0; i < g.nodes.size(); i++) {
+            for (int i = 0; i < g.totalNodes; i++) {
                 if (a == g.nodes[i]->id) {
                     tempStart = g.nodes[i];
                 }
@@ -99,11 +99,12 @@ void NEAT::mutate(Genome &g) {
                     tempEnd = g.nodes[i];
                 }
             }
+            g.totalConnections++;
             g.structure.push_back(new Connection(tempStart, tempEnd, double(rand()) * 4. / RAND_MAX - 2));
         }
     }
     //ADD NODE
-    if (double(rand()) / RAND_MAX < g.mutationRates[WEIGHTMUTATE]) {
+    if (double(rand()) / RAND_MAX < g.mutationRates[NODEMUTATE]) {
         Connection *temp = g.structure[rand() % g.totalConnections];
         temp->enabled = false;
         int newNodeID = 0;
@@ -116,6 +117,8 @@ void NEAT::mutate(Genome &g) {
         g.nodes.push_back(newNode);
         g.structure.push_back(new Connection(temp->input, newNode, 1));
         g.structure.push_back(new Connection(temp->input, newNode, temp->weight));
+        g.totalNodes++;
+        g.totalConnections+=2;
     }
     //slightly alter all mutation rates (.05 is the volatility)
     for (int i = 0; i < 7; i++) {
@@ -124,16 +127,16 @@ void NEAT::mutate(Genome &g) {
 }
 
 double NEAT::distance(Genome *a, Genome *b) {
-    if (b->structure.size() > a->structure.size()) {
+    if (b->fitness > a->fitness) {
         Genome *temp = a;
         a = b;
         b = temp;
     }
-    int disjoint = b->structure.size();
-    int n = a->structure.size();
+    int disjoint = b->totalConnections;
+    int n = a->totalConnections;
     double sum = 0;
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < b->structure.size(); j++) {
+        for (int j = 0; j < b->totalConnections; j++) {
             if (a->structure[i]->input->id == b->structure[j]->input->id &&
                 a->structure[i]->output->id == b->structure[j]->output->id) {
                 sum += fabs(a->structure[i]->weight - b->structure[j]->weight);
@@ -142,7 +145,7 @@ double NEAT::distance(Genome *a, Genome *b) {
             }
         }
     }
-    return std::abs(c1 * disjoint / n + c2 * (n - b->structure.size()) + c3 * sum / (b->structure.size() - disjoint));
+    return std::abs(c1 * disjoint / n + c2 * (n - b->totalConnections) + c3 * sum / (b->totalConnections - disjoint));
 }
 
 void NEAT::classify() {
@@ -188,7 +191,8 @@ void NEAT::cull() {
 void NEAT::repopulate() {
     std::vector<Genome *> newPool;
     for (int i = 0; i < species.size(); i++) {
-        for (int j = 0; j < species[i].genomes.size(); j++) {
+        newPool.push_back(new Genome(species[i].genomes[0]->encode()));
+        for (int j = 0; j < species[i].genomes.size()-1; j++) {
             if (rand() % 1000 == 1) {
                 newPool.push_back(mate(species[i].genomes[rand() % (species[i].genomes.size() / 2)],
                                        species[i].genomes[rand() % (species[i].genomes.size() / 2)]));
@@ -202,6 +206,7 @@ void NEAT::repopulate() {
     for (int i = 0; i < pool.size(); i++) {
         delete pool[i];
     }
+    species.clear();
     pool = newPool;
 }
 
@@ -223,22 +228,22 @@ NEAT::~NEAT() {
 
 
 void NEAT::log() {
-    std::ofstream f("log.txt");
+    std::ofstream f("log.txt", std::ios::app);
     f << "Gen: " << generation << std::endl;
     f << "Max Fitness: " << species[0].maxFitness << std::endl;
     f << "Champion: " << species[0].genomes[0]->encode() << std::endl;
 }
 
 void NEAT::status() {
-    int averageSize = 0;
-    int averageFitness = 0;
+    double averageSize = 0;
+    double averageFitness = 0;
     for (int i = 0; i < pool.size(); i++) {
-        averageSize += pool[i]->structure.size();
+        averageSize += pool[i]->totalConnections;
         averageFitness += pool[i]->fitness;
     }
     averageSize /= pool.size();
     averageFitness /= pool.size();
-    std::cout << "Gen: " << std::endl << generation << "Max Fitness: " << pool[0]->fitness << std::endl
+    std::cout << "Gen: " << generation << std::endl << "Max Fitness: " << pool[0]->fitness << std::endl
               << "Average Fitness: " << averageFitness << std::endl << "Average Size: " << averageSize << std::endl
               << std::endl;
 }

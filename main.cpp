@@ -4,7 +4,6 @@
 using namespace std;
 
 int main() {
-    Xor* test = new Xor();
-    test->run();
-    cout<<"Done";
+    Xor test;
+    test.run(100);
 }
