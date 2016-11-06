@@ -34,10 +34,7 @@ public:
 
     void reset();
 
-    //Backwards to put most fit genomes first in species
-    bool operator<(const Genome &g) {
-        return (fitness < g.fitness);
-    }
+    static bool compare(Genome* a, Genome* b) { return (a->fitness > b->fitness); }
 
     //deletes disabled connections
     void clean();

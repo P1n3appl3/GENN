@@ -3,7 +3,6 @@
 
 
 #include "NEAT.h"
-#include <iostream>
 
 class Simulation {
 public:

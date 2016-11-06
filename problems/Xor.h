@@ -5,7 +5,7 @@
 
 class Xor : public Simulation {
 public:
-    double testData[4][2] = {{0, 0},
+    double testData[4][3] = {{0, 0},
                              {0, 1},
                              {1, 0},
                              {1, 1}
@@ -36,7 +36,7 @@ public:
                 g->propagate(testData[i],n);
             }
             std::cout << "Input: " << testData[i][0] << ", " << testData[i][1] << ". Answer: " << n[0] << ". Expected: "
-                      << answers[i] << std::endl;
+                      << answers[i] << ". Correct: "<<(answers[i] == n[0] > 0) << std::endl;
         }
     }
 };

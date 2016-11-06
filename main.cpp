@@ -1,9 +1,8 @@
-#include <iostream>
 #include "problems/Xor.h"
 
-using namespace std;
-
 int main() {
+    srand(time(NULL));
     Xor test;
+    //test.view(new Genome(""));
     test.run(100);
 }

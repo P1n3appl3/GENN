@@ -15,6 +15,7 @@ public:
     std::vector<Genome *> genomes;
     int staleness = 0;
     double maxFitness = 0;
+    static bool compare(Species a, Species b) { return (a.maxFitness > b.maxFitness); }
 };
 
 class NEAT {
@@ -26,6 +27,8 @@ private:
     int population, staleThreshold, generation;
 
     double c1, c2, c3, distanceThreshold;
+
+    std::ofstream f;
 
 public:
     NEAT(int inputs, int outputs);
