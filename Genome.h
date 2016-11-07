@@ -12,7 +12,7 @@ public:
     std::vector<Neuron *> nodes;
     int inputs, outputs, totalNodes, totalConnections;
     double mutationRates[7];
-    double fitness = 0;
+    double fitness = 0, adjustedFitness = 0;
 
     double sigmoid(double);
 

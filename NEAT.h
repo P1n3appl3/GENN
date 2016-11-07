@@ -43,7 +43,7 @@ public:
 
     void status();
 
-    void adjustedFitness();
+    void adjustFitness();
 
     void log();
 

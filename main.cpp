@@ -4,5 +4,5 @@ int main() {
     srand(time(NULL));
     Xor test;
     //test.view(new Genome(""));
-    test.run(100);
+    test.run(32);
 }

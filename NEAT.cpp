@@ -150,17 +150,17 @@ double NEAT::distance(Genome *a, Genome *b) {
     return std::abs(c1 * disjoint / n + c2 * (n - b->totalConnections) + c3 * sum / (b->totalConnections - disjoint));
 }
 
-void NEAT::adjustedFitness() {
+void NEAT::adjustFitness() {
     for (int i = 0; i < species.size(); i++) {
         std::sort(species[i].genomes.begin(), species[i].genomes.end(), Genome::compare);
+        for (int j = 0; j < species[i].genomes.size(); j++) {
+            species[i].genomes[j]->fitness /= species[i].genomes.size();
+        }
         if (species[i].genomes[0]->fitness > species[i].maxFitness) {
             species[i].maxFitness = species[i].genomes[0]->fitness;
             species[i].staleness = 0;
         } else {
             species[i].staleness++;
-        }
-        for (int j = 0; j < species[i].genomes.size(); j++) {
-            species[i].genomes[j]->fitness /= species[i].genomes.size();
         }
     }
     std::sort(species.begin(), species.end(), Species::compare);
@@ -196,6 +196,7 @@ void NEAT::repopulate() {
         delete pool[i];
     }
     pool = newPool;
+    std::cout<<pool.size()<<std::endl;
     for (int i = 0; i < species.size(); i++) {
         species[i].genomes.clear();
         species[i].genomes.push_back(pool[i]);
@@ -218,15 +219,10 @@ void NEAT::classify() {
             species.back().genomes.push_back(pool[i]);
         }
     }
-
-    int totalSize = 0;
-    for (int i = 0; i < species.size(); i++) {
-        totalSize += species[i].genomes.size();
-    }
 }
 
 void NEAT::nextGen() {
-    adjustedFitness();
+    adjustFitness();
     log();
     status();
     cull();
@@ -252,7 +248,7 @@ void NEAT::log() {
 void NEAT::status() {
     double averageSize = 0;
     double averageFitness = 0;
-    for (int i = 0; i < pool.size(); i++) {
+    for (int i = 0; i < species.size(); i++) {
         averageSize += pool[i]->totalConnections;
         averageFitness += pool[i]->fitness;
     }
