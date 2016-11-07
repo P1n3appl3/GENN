@@ -5,7 +5,7 @@
 
 class Xor : public Simulation {
 public:
-    double testData[4][3] = {{0, 0},
+    double testData[4][2] = {{0, 0},
                              {0, 1},
                              {1, 0},
                              {1, 1}
@@ -24,7 +24,7 @@ public:
             for (int j = 0; j < 3; j++) {
                 g->propagate(testData[i], n);
             }
-            g->fitness += answers[i] == n[0] > 0;
+            g->fitness += answers[i] == n[0] > .5;
         }
     }
 

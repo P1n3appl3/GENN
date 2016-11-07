@@ -11,14 +11,14 @@
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
     double m[7];
-    population = 150;
+    population = 500;
     f.open("log.txt");
     m[WEIGHTMUTATE] = .8;
     m[PERTURBMUTATE] = .9;
     m[ENABLEMUTATE] = .02;
     m[STEPSIZE] = .1;
-    m[LINKMUTATE] = .05;
-    m[NODEMUTATE] = .03;
+    m[LINKMUTATE] = .0005;
+    m[NODEMUTATE] = .0003;
     m[CROSSOVER] = .75;
     c1 = 1;
     c2 = 1;
@@ -154,10 +154,11 @@ void NEAT::adjustFitness() {
     for (int i = 0; i < species.size(); i++) {
         std::sort(species[i].genomes.begin(), species[i].genomes.end(), Genome::compare);
         for (int j = 0; j < species[i].genomes.size(); j++) {
-            species[i].genomes[j]->fitness /= species[i].genomes.size();
+            species[i].genomes[j]->adjustedFitness = species[i].genomes[j]->fitness;
+            species[i].genomes[j]->adjustedFitness /= species[i].genomes.size();
         }
         if (species[i].genomes[0]->fitness > species[i].maxFitness) {
-            species[i].maxFitness = species[i].genomes[0]->fitness;
+            species[i].maxFitness = species[i].genomes[0]->adjustedFitness;
             species[i].staleness = 0;
         } else {
             species[i].staleness++;
@@ -180,23 +181,17 @@ void NEAT::repopulate() {
     for (int i = 0; i < species.size(); i++) {
         newPool.push_back(new Genome(species[i].genomes[0]->encode()));
         for (int j = 0; j < species[i].genomes.size() - 1; j++) {
-            if (rand() % 1000 != 1) {
-                newPool.push_back(mate(species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)],
-                                       species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)]));
-            } else {
-                int temp = rand() % species.size();
-                newPool.push_back(mate(species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)],
-                                       species[temp].genomes[rand() %
-                                                             std::max((int) species[temp].genomes.size() / 2, 1)]));
-            }
+            newPool.push_back(mate(species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)],
+                                   species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)]));
         }
     }
-
-    for (int i = 0; i < pool.size(); i++) {
+    while (newPool.size() < population) {
+        newPool.push_back(mate(pool[rand() % population], pool[rand() % population]));
+    }
+    for (int i = 0; i < population; i++) {
         delete pool[i];
     }
     pool = newPool;
-    std::cout<<pool.size()<<std::endl;
     for (int i = 0; i < species.size(); i++) {
         species[i].genomes.clear();
         species[i].genomes.push_back(pool[i]);
@@ -205,7 +200,7 @@ void NEAT::repopulate() {
 
 
 void NEAT::classify() {
-    for (int i = species.size(); i < pool.size(); i++) {
+    for (int i = species.size(); i < population; i++) {
         bool newSpecies = true;
         for (int j = 0; j < species.size(); j++) {
             if (distance(pool[i], species[j].genomes[0]) < distanceThreshold) {
@@ -232,7 +227,7 @@ void NEAT::nextGen() {
 }
 
 NEAT::~NEAT() {
-    for (int i = 0; i < pool.size(); i++) {
+    for (int i = 0; i < population; i++) {
         delete pool[i];
     }
     f.close();
@@ -248,14 +243,14 @@ void NEAT::log() {
 void NEAT::status() {
     double averageSize = 0;
     double averageFitness = 0;
-    for (int i = 0; i < species.size(); i++) {
+    for (int i = 0; i < population; i++) {
         averageSize += pool[i]->totalConnections;
         averageFitness += pool[i]->fitness;
     }
-    averageSize /= pool.size();
-    averageFitness /= pool.size();
-    std::cout << "Gen: " << generation << " Max Fitness: " << species[0].maxFitness << " Average Fitness: "
-              << averageFitness << " Average Size: " << averageSize << std::endl << std::endl;
+    averageSize /= population;
+    averageFitness /= population;
+    std::cout << "Gen: " << generation << " Max Fitness: " << species[0].genomes[0]->fitness << " Average Fitness: "
+              << averageFitness << " Average Size: " << averageSize << std::endl;
 }
 
 
