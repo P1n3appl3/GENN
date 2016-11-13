@@ -24,7 +24,7 @@ private:
 
     std::vector<Species> species;
 
-    int population, staleThreshold, generation;
+    int population, staleThreshold, generation, maxSpecies;
 
     double c1, c2, c3, distanceThreshold;
 

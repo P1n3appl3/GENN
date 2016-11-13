@@ -11,20 +11,21 @@
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
     double m[7];
-    population = 500;
+    population = 150;
     f.open("log.txt");
     m[WEIGHTMUTATE] = .8;
     m[PERTURBMUTATE] = .9;
     m[ENABLEMUTATE] = .02;
-    m[STEPSIZE] = .1;
-    m[LINKMUTATE] = .0005;
-    m[NODEMUTATE] = .0003;
+    m[STEPSIZE] = .4;
+    m[LINKMUTATE] = .05;
+    m[NODEMUTATE] = .03;
     m[CROSSOVER] = .75;
     c1 = 1;
     c2 = 1;
     c3 = .4;
     staleThreshold = 15;
     distanceThreshold = 3;
+    maxSpecies = 20;
     generation = 0;
     for (int i = 0; i < population; i++) {
         pool.push_back(new Genome(inputs, outputs, m));
@@ -80,7 +81,7 @@ void NEAT::mutate(Genome &g) {
     for (int i = 0; i < g.totalConnections; i++) {
         if (double(rand()) / RAND_MAX < g.mutationRates[WEIGHTMUTATE]) {
             if (rand() / RAND_MAX < g.mutationRates[PERTURBMUTATE]) {
-                g.structure[i]->weight += ((rand() % 2) * 2 - 1) * g.mutationRates[STEPSIZE];
+                g.structure[i]->weight += ((rand() % 2) * 2 - 1) * (rand() / RAND_MAX) * g.mutationRates[STEPSIZE];
             } else {
                 g.structure[i]->weight = double(rand()) * 4. / RAND_MAX - 2;
             }
@@ -155,7 +156,7 @@ void NEAT::adjustFitness() {
         std::sort(species[i].genomes.begin(), species[i].genomes.end(), Genome::compare);
         for (int j = 0; j < species[i].genomes.size(); j++) {
             species[i].genomes[j]->adjustedFitness = species[i].genomes[j]->fitness;
-            species[i].genomes[j]->adjustedFitness /= species[i].genomes.size();
+            //species[i].genomes[j]->adjustedFitness /= species[i].genomes.size();
         }
         if (species[i].genomes[0]->fitness > species[i].maxFitness) {
             species[i].maxFitness = species[i].genomes[0]->adjustedFitness;
@@ -181,8 +182,8 @@ void NEAT::repopulate() {
     for (int i = 0; i < species.size(); i++) {
         newPool.push_back(new Genome(species[i].genomes[0]->encode()));
         for (int j = 0; j < species[i].genomes.size() - 1; j++) {
-            newPool.push_back(mate(species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)],
-                                   species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 2, 1)]));
+            newPool.push_back(mate(species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 5, 1)],
+                                   species[i].genomes[rand() % std::max((int) species[i].genomes.size() / 5, 1)]));
         }
     }
     while (newPool.size() < population) {
@@ -213,6 +214,9 @@ void NEAT::classify() {
             species.push_back(Species());
             species.back().genomes.push_back(pool[i]);
         }
+    }
+    if(species.size()>maxSpecies){
+        distanceThreshold+=.1;
     }
 }
 
@@ -249,8 +253,8 @@ void NEAT::status() {
     }
     averageSize /= population;
     averageFitness /= population;
-    std::cout << "Gen: " << generation << " Max Fitness: " << species[0].genomes[0]->fitness << " Average Fitness: "
-              << averageFitness << " Average Size: " << averageSize << std::endl;
+    std::cout << "Gen: " << generation << " Max Fitness: " << species[0].genomes[0]->fitness << " Species: "
+              << species.size() << " Average Size: " << averageSize << std::endl;
 }
 
 

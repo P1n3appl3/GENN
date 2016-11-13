@@ -35,7 +35,7 @@ Genome::Genome(int a, int b, double m[]) {
     recomputeInputs();
 }
 
-void Genome::propagate(double *a, double *b) {
+void Genome::propagate(double a[], double b[]) {
     for (int i = 0; i < inputs; i++) {
         nodes[i]->value = a[i];
     }
