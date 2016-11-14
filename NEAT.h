@@ -10,12 +10,10 @@
 #include <iostream>
 
 
-class Species {
-public:
+struct Species {
     std::vector<Genome *> genomes;
     int staleness = 0;
     double maxFitness = 0;
-    static bool compare(Species a, Species b) { return (a.maxFitness > b.maxFitness); }
 };
 
 class NEAT {
@@ -30,39 +28,36 @@ private:
 
     std::ofstream f;
 
-public:
-    NEAT(int inputs, int outputs);
-
-    ~NEAT();
-
-    void config(); //for setting constants like gen size and mutation rates
-
-    void classify();
-
-    void cull();
-
-    void status();
-
     void adjustFitness();
 
     void log();
 
-    double distance(Genome *, Genome *);
+    void status();
 
-    //staleness hurts chances unless at the top
-    Genome *mate(Genome *, Genome *);
-
-    bool innovationExists(int a, int b);
-
-    int newInnovation(int a, int b);
-
-    void mutate(Genome &);
-
-    std::vector<Genome *> pool;
+    void cull();
 
     void repopulate();
 
+    void classify();
+
+    double distance(Genome, Genome);
+
+    Genome mate(Genome *, Genome *);
+
+    void mutate(Genome &);
+
+    int newInnovation(int a, int b);
+
+    int findInnovation(int a, int b);
+
+    void labelInnovations(Genome&);
+
+public:
+    NEAT(int inputs, int outputs);
+
     void nextGen();
+
+    std::vector<Genome> pool;
 };
 
-#endif //GENN_NETWORK_H
+#endif //GENN_NEAT_H

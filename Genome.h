@@ -1,44 +1,44 @@
 #ifndef GENN_GENOME_H
 #define GENN_GENOME_H
 
-#include "math.h"
 #include <sstream>
 #include <stdlib.h>
-#include "Components.h"
+#include <vector>
+
+struct Link {
+    Link() {}
+
+    Link(int a, int b, double c = 0) {
+        input = a;
+        output = b;
+        weight = c;
+    }
+
+    int input, output, id;
+    double weight;
+    bool enabled = true;
+};
 
 class Genome {
 public:
-    std::vector<Connection *> structure;
-    std::vector<Neuron *> nodes;
-    int inputs, outputs, totalNodes, totalConnections;
+    int inputs, outputs, nodes;
     double mutationRates[7];
     double fitness = 0, adjustedFitness = 0;
+    std::vector<Link> structure;
 
-    double sigmoid(double);
+    Genome(const Genome &);
 
     Genome(std::string);
 
     Genome(int, int, double[]);
 
-    ~Genome();
-
-    void propagate(double *, double *);
-
     std::string encode();
 
     void decode(std::string);
 
-    void recomputeInputs();
-
-    bool hasConnection(int, int);
-
-    void reset();
-
-    static bool compare(Genome* a, Genome* b) { return (a->fitness > b->fitness); }
-
-    //deletes disabled connections
-    void clean();
+    //static bool compare(const Genome a, const Genome b) const { return (a.fitness > b.fitness); }
+    static bool compare(Genome *a, Genome *b) { return (a->fitness > b->fitness); }
 };
 
 
-#endif //GENN_NETWORK_H
+#endif //GENN_GENOME_H
