@@ -6,7 +6,11 @@
 
 class Simulation {
 public:
-    NEAT controller;
+    NEAT *controller;
+
+    ~Simulation(){
+        delete controller;
+    }
 
     virtual void evaluate(Genome&)=0;
 
@@ -14,10 +18,10 @@ public:
 
     void run(int n) {
         for(int t=0;t<n;t++) {
-            for (int i = 0; i < controller.pool.size(); i++) {
-                evaluate(controller.pool[i]);
+            for (int i = 0; i < controller->pool.size(); i++) {
+                evaluate(controller->pool[i]);
             }
-            controller.nextGen();
+            controller->nextGen();
         }
     }
 };

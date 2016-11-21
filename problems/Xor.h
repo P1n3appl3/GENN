@@ -1,7 +1,6 @@
 #ifndef GENN_XOR_H
 #define GENN_XOR_H
 
-#include <ntsecapi.h>
 #include "../simulation.h"
 
 class Xor : public Simulation {
@@ -15,7 +14,7 @@ public:
     double answers[4] = {0.0, 1.0, 1.0, 0.0};
 
     Xor() {
-        controller = NEAT(3, 1);
+        controller = new NEAT(3, 1);
     }
 
     void evaluate(Genome &g) {
@@ -24,12 +23,12 @@ public:
         for (int i = 0; i < 4; i++) {
             double a[1];
             n.reset();
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 5; j++) {
                 n.propagate(testData[i], a);
             }
             error+=std::abs(answers[i]-a[0]);
         }
-        g.fitness = 4-error;
+        g.fitness = std::max(0.,4-error);
     }
 
     void view(Network n) {

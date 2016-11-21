@@ -36,8 +36,7 @@ public:
 
     void decode(std::string);
 
-    //static bool compare(const Genome a, const Genome b) const { return (a.fitness > b.fitness); }
-    static bool compare(Genome *a, Genome *b) { return (a->fitness > b->fitness); }
+    static bool compare(const Genome *a, const Genome *b) { return (a->fitness > b->fitness); }
 };
 
 

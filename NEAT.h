@@ -14,6 +14,8 @@ struct Species {
     std::vector<Genome *> genomes;
     int staleness = 0;
     double maxFitness = 0;
+
+    static bool compare(const Species &a, const Species &b) { return a.genomes[0]->fitness > b.genomes[0]->fitness; }
 };
 
 class NEAT {
@@ -50,7 +52,7 @@ private:
 
     int findInnovation(int a, int b);
 
-    void labelInnovations(Genome&);
+    void labelInnovations(Genome &);
 
 public:
     NEAT(int inputs, int outputs);
