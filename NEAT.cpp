@@ -11,7 +11,7 @@
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
     double m[7];
-    population = 15;
+    population = 150;
     f.open("log.txt");
     m[WEIGHTMUTATE] = .8;
     m[PERTURBMUTATE] = .9;
@@ -106,12 +106,16 @@ void NEAT::mutate(Genome &g) {
     //ADD CONNECTION
     if (double(rand()) / RAND_MAX < g.mutationRates[LINKMUTATE]) {
         int a = rand() % g.nodes;
-        int b = rand() % (g.nodes - g.inputs);
+        int b = rand() % (g.nodes - g.inputs) + g.inputs;
+        bool temp = true;
         for (int i = 0; i < g.structure.size(); i++) {
             if (g.structure[i].input == a && g.structure[i].output == b) {
-                g.structure.push_back(Link(a, b, double(rand()) * 4. / RAND_MAX - 2));
-                g.structure.back().id = findInnovation(a, b);
+                temp = false;
             }
+        }
+        if (temp) {
+            g.structure.push_back(Link(a, b, double(rand()) * 4. / RAND_MAX - 2));
+            g.structure.back().id = findInnovation(a, b);
         }
     }
     //ADD NODE
@@ -211,9 +215,11 @@ void NEAT::repopulate() {
             parents.push_back(i);
         }
     }
-    std::cout<<" ";
-    //TODO: THIS WHILE LOOP HAS THE TERRIBLE BUG THAT I CANT FIND
     while (newPool.size() < population) {
+        if (parents.size() == 0) {
+            newPool.push_back(mate(&pool[rand() % pool.size()], &pool[rand() % pool.size()]));
+            continue;
+        }
         int temp = parents[rand() % parents.size()];
         // 1 in 1000 chance of interspecies mating
         if (rand() % 1000 == 1) {
@@ -225,10 +231,14 @@ void NEAT::repopulate() {
                                    species[temp].genomes[rand() % species[temp].genomes.size()]));
         }
     }
+    //Vector Magic~
+    std::vector<Genome>().swap(pool);
     pool = newPool;
     for (int i = 0; i < species.size(); i++) {
         if (species[i].genomes.size() > 1) {
             species[i].genomes.clear();
+            //I actually have no clue how vector memory allocation works
+            species[i].genomes.shrink_to_fit();
             species[i].genomes.push_back(&pool[i]);
         } else {
             species.erase(species.begin() + i);
