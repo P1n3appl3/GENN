@@ -10,7 +10,6 @@
 
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
-    double m[7];
     population = 150;
     f.open("log.txt");
     m[WEIGHTMUTATE] = .8;
@@ -171,6 +170,9 @@ double NEAT::distance(Genome a, Genome b) {
         }
     }
     int n = std::max(a.structure.size(), b.structure.size());
+    if (std::abs(aMaxID - bMaxID) / n + c2 * disjoint / n > 1) {
+        //std::cout << std::abs(aMaxID - bMaxID) / n + c2 * disjoint / n + c3 * weights / similarConnections << std::endl;
+    }
     return std::abs(c1 * double(std::abs(aMaxID - bMaxID)) / n + c2 * disjoint / n + c3 * weights / similarConnections);
 }
 
@@ -217,7 +219,7 @@ void NEAT::repopulate() {
     }
     while (newPool.size() < population) {
         if (parents.size() == 0) {
-            newPool.push_back(mate(&pool[rand() % pool.size()], &pool[rand() % pool.size()]));
+            newPool.push_back(Genome(pool[0].inputs, pool[0].outputs, m));;
             continue;
         }
         int temp = parents[rand() % parents.size()];
@@ -231,13 +233,13 @@ void NEAT::repopulate() {
                                    species[temp].genomes[rand() % species[temp].genomes.size()]));
         }
     }
-    //Vector Magic~
+    //Vector Magic~ prob not necessary but it will serve as a reminder of the monolithic memory leak I had earlier
     std::vector<Genome>().swap(pool);
     pool = newPool;
     for (int i = 0; i < species.size(); i++) {
         if (species[i].genomes.size() > 1) {
             species[i].genomes.clear();
-            //I actually have no clue how vector memory allocation works
+            //I actually have no clue how vector memory allocation works... this is prob irrelevant
             species[i].genomes.shrink_to_fit();
             species[i].genomes.push_back(&pool[i]);
         } else {
@@ -263,9 +265,11 @@ void NEAT::classify() {
             species.back().genomes.push_back(&pool[i]);
         }
     }
-//    if(species.size()>maxSpecies){
-//        distanceThreshold+=.1;
-//    }
+    /* Experimental feature: reactive threshold to stabilize species numbers
+    if(species.size()>maxSpecies){
+        distanceThreshold+=.1;
+    }
+     */
 }
 
 void NEAT::nextGen() {
@@ -288,14 +292,17 @@ void NEAT::log() {
 void NEAT::status() {
     double averageSize = 0;
     double averageFitness = 0;
+    double minSize = 999, maxSize = 0;
     for (int i = 0; i < population; i++) {
         averageSize += pool[i].structure.size();
         averageFitness += pool[i].fitness;
+        minSize = std::min(minSize, (double)pool[i].structure.size());
+        maxSize = std::max(maxSize, (double)pool[i].structure.size());
     }
     averageSize /= population;
     averageFitness /= population;
-    std::cout << "Gen: " << generation << " Max F: " << species[0].genomes[0]->fitness << " Species: "
-              << species.size() << " Avg Size: " << averageSize << " Staleness: " << species[0].staleness << " Avg F: "
-              << averageFitness << std::endl;
+    std::cout << "Gen: " << generation << " Fitness: " << species[0].genomes[0]->fitness << " " << averageFitness
+              << " Species: " << species.size() << " Size: " << minSize << " " << averageSize << " " << maxSize
+              << std::endl;
 }
 

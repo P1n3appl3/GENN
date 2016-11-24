@@ -20,6 +20,8 @@ struct Species {
 
 class NEAT {
 private:
+    double m[7];
+
     std::vector<std::array<int, 2>> innovation;
 
     std::vector<Species> species;
