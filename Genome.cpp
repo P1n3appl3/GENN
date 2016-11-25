@@ -17,13 +17,13 @@ Genome::Genome(int a, int b, double m[]) {
     inputs = a;
     outputs = b;
     nodes=inputs+outputs;
-    for (int i = 0; i < inputs; i++) {
-        for (int j = 0; j < outputs; j++) {
+    for (int i = 0; i < inputs; ++i) {
+        for (int j = 0; j < outputs; ++j) {
             //Initializes all connections with random weight 0-2
             structure.push_back(Link(i, inputs + j, double(rand()) * 4. / RAND_MAX - 2));
         }
     }
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; ++i) {
         mutationRates[i] = m[i];
     }
 }
@@ -34,11 +34,11 @@ std::string Genome::encode() {
     std::ostringstream ss;
     ss << inputs << ' ' << outputs << ' ';
     ss << structure.size() << ' ';
-    for (int i = 0; i < structure.size(); i++) {
+    for (int i = 0; i < structure.size(); ++i) {
         ss << structure[i].weight << ' ' << structure[i].enabled << ' '
            << structure[i].input << ' ' << structure[i].output << ' ';
     }
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; ++i) {
         ss << mutationRates[i] << ' ';
     }
     return ss.str();
@@ -51,14 +51,14 @@ void Genome::decode(std::string s) {
     int temp;
     ss >> temp;
     structure.resize(temp);
-    for (int i = 0; i < temp; i++) {
+    for (int i = 0; i < temp; ++i) {
         structure[i] = Link();
         ss >> structure[i].weight;
         ss >> structure[i].enabled;
         ss >> structure[i].input;
         ss >> structure[i].output;
     }
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; ++i) {
         ss >> mutationRates[i];
     }
 }

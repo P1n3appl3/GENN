@@ -1,4 +1,5 @@
 #include "NEAT.h"
+#include "Genome.h"
 
 #define WEIGHTMUTATE 0
 #define PERTURBMUTATE 1
@@ -25,13 +26,14 @@ NEAT::NEAT(int inputs, int outputs) {
     staleThreshold = 15;
     distanceThreshold = 3;
     //maxSpecies = 20;
+    maxFitness = 0;
     generation = 0;
-    for (int i = 0; i < population; i++) {
+    for (int i = 0; i < population; ++i) {
         pool.push_back(Genome(inputs, outputs, m));
         labelInnovations(pool.back());
     }
-    for (int i = 0; i < inputs; i++) {
-        for (int j = 0; j < outputs; j++) {
+    for (int i = 0; i < inputs; ++i) {
+        for (int j = 0; j < outputs; ++j) {
             newInnovation(i, inputs + j);
         }
     }
@@ -46,7 +48,7 @@ int NEAT::newInnovation(int a, int b) {
 }
 
 int NEAT::findInnovation(int a, int b) {
-    for (int i = 0; i < innovation.size(); i++) {
+    for (int i = 0; i < innovation.size(); ++i) {
         if (innovation[i][0] == a && innovation[i][1] == b) {
             return i;
         }
@@ -56,7 +58,7 @@ int NEAT::findInnovation(int a, int b) {
 
 
 void NEAT::labelInnovations(Genome &g) {
-    for (int i = 0; i < g.structure.size(); i++) {
+    for (int i = 0; i < g.structure.size(); ++i) {
         g.structure[i].id = findInnovation(g.structure[i].input, g.structure[i].output);
     }
 }
@@ -70,8 +72,8 @@ Genome NEAT::mate(Genome *a, Genome *b) {
     }
     Genome child = Genome(*a);
     if (double(rand()) / RAND_MAX < child.mutationRates[CROSSOVER]) {
-        for (int i = 0; i < child.structure.size(); i++) {
-            for (int j = 0; j < b->structure.size(); j++) {
+        for (int i = 0; i < child.structure.size(); ++i) {
+            for (int j = 0; j < b->structure.size(); ++j) {
                 if (b->structure[j].id == child.structure[i].id) {
                     child.structure[i].weight = (child.structure[i].weight + b->structure[j].weight) / 2;
                     if (child.structure[i].enabled != b->structure[i].enabled) {
@@ -94,7 +96,7 @@ void NEAT::mutate(Genome &g) {
     }
     //WEIGHTS
     if (double(rand()) / RAND_MAX < g.mutationRates[WEIGHTMUTATE]) {
-        for (int i = 0; i < g.structure.size(); i++) {
+        for (int i = 0; i < g.structure.size(); ++i) {
             if (double(rand()) / RAND_MAX < g.mutationRates[PERTURBMUTATE]) {
                 g.structure[i].weight += ((rand() % 2) * 2 - 1) * (rand() / RAND_MAX) * g.mutationRates[STEPSIZE];
             } else {
@@ -107,7 +109,7 @@ void NEAT::mutate(Genome &g) {
         int a = rand() % g.nodes;
         int b = rand() % (g.nodes - g.inputs) + g.inputs;
         bool temp = true;
-        for (int i = 0; i < g.structure.size(); i++) {
+        for (int i = 0; i < g.structure.size(); ++i) {
             if (g.structure[i].input == a && g.structure[i].output == b) {
                 temp = false;
             }
@@ -130,37 +132,38 @@ void NEAT::mutate(Genome &g) {
         }
     }
     //slightly alter all mutation rates (.05 is the volatility)
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; ++i) {
         g.mutationRates[i] += ((rand() % 2) * 2 - 1) * .05 * g.mutationRates[i];
     }
 }
 
 double NEAT::distance(Genome a, Genome b) {
     int aMaxID = 0;
-    for (int i = 0; i < a.structure.size(); i++) {
+    for (int i = 0; i < a.structure.size(); ++i) {
         aMaxID = std::max(aMaxID, a.structure[i].id);
     }
     int bMaxID = 0;
-    for (int i = 0; i < b.structure.size(); i++) {
+    for (int i = 0; i < b.structure.size(); ++i) {
         bMaxID = std::max(bMaxID, b.structure[i].id);
     }
     int disjoint = 0;
     double weights = 0;
     int similarConnections = 0;
-    for (int i = 0; i < innovation.size(); i++) {
+    int ai=0, bi=0;
+    for (int i = 0; i < innovation.size(); ++i) {
         int tempa = -1;
         int tempb = -1;
-        for (int j = 0; j < a.structure.size(); j++) {
-            if (a.structure[j].id == i) {
-                tempa = j;
-                break;
-            }
+        while(ai<a.structure.size()&&a.structure[ai].id<i){
+            ai++;
         }
-        for (int j = 0; j < b.structure.size(); j++) {
-            if (b.structure[j].id == i) {
-                tempb = j;
-                break;
-            }
+        if(a.structure[ai].id==i);{
+            tempa = ai;
+        }
+        while(bi<b.structure.size()&&b.structure[bi].id<i){
+            bi++;
+        }
+        if(b.structure[bi].id==i);{
+            tempb = bi;
         }
         if (tempa != -1 && tempb != -1) {
             similarConnections++;
@@ -170,22 +173,20 @@ double NEAT::distance(Genome a, Genome b) {
         }
     }
     int n = std::max(a.structure.size(), b.structure.size());
-    if (std::abs(aMaxID - bMaxID) / n + c2 * disjoint / n > 1) {
-        //std::cout << std::abs(aMaxID - bMaxID) / n + c2 * disjoint / n + c3 * weights / similarConnections << std::endl;
-    }
-    return std::abs(c1 * double(std::abs(aMaxID - bMaxID)) / n + c2 * disjoint / n + c3 * weights / similarConnections);
+    return std::abs(c1 * std::abs(a.structure.size() - b.structure.size()) / n + c2 * disjoint / n + c3 * weights / similarConnections);
 }
 
 void NEAT::adjustFitness() {
-    for (int i = 0; i < species.size(); i++) {
+    for (int i = 0; i < species.size(); ++i) {
         std::sort(std::begin(species[i].genomes), std::end(species[i].genomes), Genome::compare);
-        for (int j = 0; j < species[i].genomes.size(); j++) {
+        for (int j = 0; j < species[i].genomes.size(); ++j) {
             species[i].genomes[j]->adjustedFitness = species[i].genomes[j]->fitness;
             species[i].genomes[j]->adjustedFitness /= species[i].genomes.size();
         }
         if (species[i].genomes[0]->fitness > species[i].maxFitness) {
             species[i].maxFitness = species[i].genomes[0]->fitness;
             species[i].staleness = 0;
+            maxFitness = std::max(maxFitness, species[i].maxFitness);
         } else {
             species[i].staleness++;
         }
@@ -194,8 +195,8 @@ void NEAT::adjustFitness() {
 }
 
 void NEAT::cull() {
-    for (int i = 0; i < species.size(); i++) {
-        if (species[i].staleness >= staleThreshold) {
+    for (int i = 0; i < species.size(); ++i) {
+        if (species[i].staleness >= staleThreshold && species[i].maxFitness < maxFitness) {
             species.erase(species.begin() + i);
             i--;
         }
@@ -207,21 +208,23 @@ void NEAT::repopulate() {
     std::vector<Genome> newPool;
     newPool.reserve(population);
     std::vector<int> parents;
-    for (int i = 0; i < species.size(); i++) {
+    for (int i = 0; i < species.size(); ++i) {
+        newPool.push_back(Genome(*species[i].genomes[0]));
+        //only top 20 percent of species is allowed to reproduce unless it is smaller than 6 genomes
         if (species[i].genomes.size() >= 5) {
-            newPool.push_back(Genome(*species[i].genomes[0]));
+            species[i].genomes.resize(species[i].genomes.size() / 5);
         }
-        //only top 20 percent of species is allowed to reproduce
-        species[i].genomes.resize(species[i].genomes.size() / 5 + 1);
-        for (int j = 0; j < species[i].genomes.size(); j++) {
+        for (int j = 0; j < species[i].genomes.size(); ++j) {
             parents.push_back(i);
         }
     }
     while (newPool.size() < population) {
+        /* Only needed if stuff is breaking
         if (parents.size() == 0) {
             newPool.push_back(Genome(pool[0].inputs, pool[0].outputs, m));;
             continue;
         }
+        */
         int temp = parents[rand() % parents.size()];
         // 1 in 1000 chance of interspecies mating
         if (rand() % 1000 == 1) {
@@ -233,27 +236,25 @@ void NEAT::repopulate() {
                                    species[temp].genomes[rand() % species[temp].genomes.size()]));
         }
     }
-    //Vector Magic~ prob not necessary but it will serve as a reminder of the monolithic memory leak I had earlier
+    //~Vector Magic~ prob not necessary but it will serve as a reminder of the monolithic memory leak I had earlier
     std::vector<Genome>().swap(pool);
     pool = newPool;
-    for (int i = 0; i < species.size(); i++) {
-        if (species[i].genomes.size() > 1) {
-            species[i].genomes.clear();
-            //I actually have no clue how vector memory allocation works... this is prob irrelevant
-            species[i].genomes.shrink_to_fit();
-            species[i].genomes.push_back(&pool[i]);
-        } else {
-            species.erase(species.begin() + i);
-            i--;
-        }
+    for (int i = 0; i < species.size(); ++i) {
+        species[i].genomes.clear();
+        //I actually have no clue how vector memory allocation works... this is prob irrelevant
+        species[i].genomes.shrink_to_fit();
+        species[i].genomes.push_back(&pool[i]);
+    }
+    for(int i=0;i<pool.size();++i){
+        std::sort(std::begin(pool[i].structure),std::end(pool[i].structure),Link::compare);
     }
 }
 
 
 void NEAT::classify() {
-    for (int i = species.size(); i < population; i++) {
+    for (int i = species.size(); i < population; ++i) {
         bool newSpecies = true;
-        for (int j = 0; j < species.size(); j++) {
+        for (int j = 0; j < species.size(); ++j) {
             if (distance(pool[i], *species[j].genomes[0]) < distanceThreshold) {
                 newSpecies = false;
                 species[j].genomes.push_back(&pool[i]);
@@ -285,19 +286,20 @@ void NEAT::nextGen() {
 
 void NEAT::log() {
     f << "Gen: " << generation << std::endl;
-    f << "Max Fitness: " << species[0].genomes[0]->fitness << std::endl;
-    f << "Champion: " << species[0].genomes[0]->encode() << std::endl;
+    f << "Max Fitness: " << pool[0].fitness << std::endl;
+    f << "Champion: " << pool[0].encode().c_str() << std::endl;
+
 }
 
 void NEAT::status() {
     double averageSize = 0;
     double averageFitness = 0;
     double minSize = 999, maxSize = 0;
-    for (int i = 0; i < population; i++) {
+    for (int i = 0; i < population; ++i) {
         averageSize += pool[i].structure.size();
         averageFitness += pool[i].fitness;
-        minSize = std::min(minSize, (double)pool[i].structure.size());
-        maxSize = std::max(maxSize, (double)pool[i].structure.size());
+        minSize = std::min(minSize, (double) pool[i].structure.size());
+        maxSize = std::max(maxSize, (double) pool[i].structure.size());
     }
     averageSize /= population;
     averageFitness /= population;

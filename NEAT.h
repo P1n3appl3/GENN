@@ -28,7 +28,7 @@ private:
 
     int population, staleThreshold, generation, maxSpecies;
 
-    double c1, c2, c3, distanceThreshold;
+    double c1, c2, c3, distanceThreshold, maxFitness;
 
     std::ofstream f;
 

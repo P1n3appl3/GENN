@@ -20,10 +20,10 @@ public:
     void evaluate(Genome &g) {
         Network n(g);
         double error = 0.0;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; ++i) {
             double a[1];
             n.reset();
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 5; ++j) {
                 n.propagate(testData[i], a);
             }
             error+=std::abs(answers[i]-a[0]);
@@ -33,10 +33,10 @@ public:
 
     void view(Network n) {
         double error = 0.0;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; ++i) {
             double a[1];
             n.reset();
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 5; ++j) {
                 n.propagate(testData[i],a);
             }
             error+=std::abs(answers[i]-a[0]);

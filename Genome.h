@@ -17,6 +17,8 @@ struct Link {
     int input, output, id;
     double weight;
     bool enabled = true;
+
+    static bool compare(const Link &a, const Link& b) { return (a.id < b.id); }
 };
 
 class Genome {

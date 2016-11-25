@@ -17,8 +17,8 @@ public:
     virtual void view(Network)=0;
 
     void run(int n) {
-        for(int t=0;t<n;t++) {
-            for (int i = 0; i < controller->pool.size(); i++) {
+        for(int t=0;t<n;++t) {
+            for (int i = 0; i < controller->pool.size(); ++i) {
                 evaluate(controller->pool[i]);
             }
             controller->nextGen();
