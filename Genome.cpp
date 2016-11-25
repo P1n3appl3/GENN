@@ -16,7 +16,7 @@ Genome::Genome(std::string a) {
 Genome::Genome(int a, int b, double m[]) {
     inputs = a;
     outputs = b;
-    nodes=inputs+outputs;
+    nodes = inputs + outputs;
     for (int i = 0; i < inputs; ++i) {
         for (int j = 0; j < outputs; ++j) {
             //Initializes all connections with random weight 0-2
@@ -30,7 +30,8 @@ Genome::Genome(int a, int b, double m[]) {
 
 std::string Genome::encode() {
     //writes to a space delimited string with the format:
-    //inputs outputs totalConnections conN.weight conN.enabled conN.input conN.output mutationN
+    //totalNodes inputs outputs nodeN.id nodeN.type totalConnections conN.weight conN.enabled conN.input conN.output mutationN
+    //then encodes it all to one big b64 string cuz why the heck not. isn't making data less readable fun!
     std::ostringstream ss;
     ss << inputs << ' ' << outputs << ' ';
     ss << structure.size() << ' ';
@@ -41,10 +42,11 @@ std::string Genome::encode() {
     for (int i = 0; i < 7; ++i) {
         ss << mutationRates[i] << ' ';
     }
-    return ss.str();
+    return base64::encode(reinterpret_cast<const unsigned char *>(ss.str().c_str()), ss.str().length());
 }
 
 void Genome::decode(std::string s) {
+    s = base64::decode(s);
     std::stringstream ss(s);
     ss >> inputs;
     ss >> outputs;

@@ -27,12 +27,12 @@ class Network {
 private:
     double sigmoid(double);
 
-    std::vector<Neuron*> inputs;
-    std::vector<Neuron*> hiddenNodes;
-    std::vector<Neuron*> outputs;
+    std::vector<Neuron *> inputs;
+    std::vector<Neuron *> hiddenNodes;
+    std::vector<Neuron *> outputs;
     std::vector<Connection> structure;
 public:
-    Network(Genome&);
+    Network(Genome &);
 
     ~Network();
 

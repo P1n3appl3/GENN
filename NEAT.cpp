@@ -1,5 +1,4 @@
 #include "NEAT.h"
-#include "Genome.h"
 
 #define WEIGHTMUTATE 0
 #define PERTURBMUTATE 1

@@ -1,6 +1,7 @@
 #ifndef GENN_GENOME_H
 #define GENN_GENOME_H
 
+#include "base64.h"
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
@@ -18,7 +19,7 @@ struct Link {
     double weight;
     bool enabled = true;
 
-    static bool compare(const Link &a, const Link& b) { return (a.id < b.id); }
+    static bool compare(const Link &a, const Link &b) { return (a.id < b.id); }
 };
 
 class Genome {
