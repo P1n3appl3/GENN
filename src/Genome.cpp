@@ -1,4 +1,4 @@
-#include "Genome.h"
+#include "../include/Genome.h"
 
 
 Genome::Genome(const Genome &g) {

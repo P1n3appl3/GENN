@@ -1,4 +1,4 @@
-#include "Network.h"
+#include "../include/Network.h"
 
 Network::Network(Genome &g) {
     for (int i = 0; i < g.inputs; ++i) {

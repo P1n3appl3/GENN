@@ -1,4 +1,4 @@
-#include "problems/Xor.h"
+#include "Xor.h"
 
 int main() {
     Xor test;

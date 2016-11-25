@@ -1,4 +1,4 @@
-#include "NEAT.h"
+#include "../include/NEAT.h"
 
 #define WEIGHTMUTATE 0
 #define PERTURBMUTATE 1

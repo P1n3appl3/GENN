@@ -1,7 +1,7 @@
 #ifndef GENN_XOR_H
 #define GENN_XOR_H
 
-#include "../simulation.h"
+#include "../include/simulation.h"
 
 class Xor : public Simulation {
 private:

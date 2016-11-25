@@ -1,7 +1,7 @@
 #ifndef GENN_GENOME_H
 #define GENN_GENOME_H
 
-#include "base64.h"
+#include "../lib/base64.h"
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
