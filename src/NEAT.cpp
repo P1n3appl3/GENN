@@ -7,7 +7,7 @@
 #define LINKMUTATE 4
 #define NODEMUTATE 5
 #define CROSSOVER 6
-//TEST
+
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
     population = 150;
