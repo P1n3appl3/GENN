@@ -13,9 +13,9 @@ Running GENN on your own problems is easy:
 
 Here is some pseudo-code for creating a simulation (full source of Xor and Pole Balance in /examples/)
 
-```Sim.cpp```
+`Sim.cpp`
 
-```
+```c++
 // The constructor must create a controller object with two arguments,
 // the number of outputs from and inputs to your simulation respectively
 Sim::Sim() {
@@ -43,9 +43,9 @@ void Sim::evaluate(Genome &g) {
 void Sim::view(Network n) {}
 ```
 
-```main.cpp```
+`main.cpp`
 
-```
+```c++
 #include "Sim.h"
 
 int main() {
