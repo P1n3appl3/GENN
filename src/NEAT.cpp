@@ -10,7 +10,7 @@
 
 NEAT::NEAT(int inputs, int outputs) {
     std::srand(time(NULL));
-    population = 150;
+    population = 250;
     f.open("log.txt");
     m[WEIGHTMUTATE] = .8;
     m[PERTURBMUTATE] = .9;
@@ -285,7 +285,7 @@ void NEAT::nextGen() {
 
 void NEAT::log() {
     f << "Gen: " << generation << std::endl;
-    f << "Max Fitness: " << pool[0].fitness << std::endl;
+    f << "Max Fitness: " << species[0].genomes[0]->fitness << std::endl;
     f << "Champion: " << pool[0].encode().c_str() << std::endl;
 
 }
