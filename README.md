@@ -2,7 +2,7 @@
 ## **About**
 NeuroEvolution of Augmenting Topologies is a genetic algorithm developed by Kenneth O. Stanley for evolving neural networks' weights and topologies. This project is a modified implementation of that algorithm for use with Recurrent Neural Networks. The intended purpose is producing more efficient solutions to continuous input simulations such as control theory problems and real time video games. While GENN *can* still solve traditional classification problems, it would be easier and more efficient to use a different machine learning solution.
 
-[More info](http://www.josephryan.me/genn.html)
+[More info](http://nn.cs.utexas.edu/?neat)
 
 ## **Adding simulations**
 Running GENN on your own problems is easy:
