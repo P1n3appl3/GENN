@@ -719,7 +719,7 @@ int tigrSaveImage(const char *fileName, Tigr *bmp)
 	Save s;
 	long dataPos, dataSize, err;
 	
-	// TODO - unicode?
+	// TODO - unicode? id:0 gh:1
 	FILE *out = fopen(fileName, "wb");
 	if (!out)
 		return 1;
@@ -757,7 +757,7 @@ int tigrSaveImage(const char *fileName, Tigr *bmp)
 
 void *tigrReadFile(const char *fileName, int *length)
 {
-	// TODO - unicode?
+	// TODO - unicode? id:3 gh:4
 	FILE *file;
 	char *data;
 	size_t len;
@@ -2877,7 +2877,7 @@ static id autoreleasePool = NULL;
 void _tigrCleanupOSX()
 {
 	#ifdef ARC_AVAILABLE
-	// TODO autorelease pool
+	// TODO autorelease pool id:2 gh:3
 	#else
 	objc_msgSend_void(autoreleasePool, sel_registerName("drain"));
 	#endif
@@ -2889,7 +2889,7 @@ void tigrInitOSX()
 		return;
 
 	#ifdef ARC_AVAILABLE
-	// TODO and what do we do now? it's a bit too tricky to use @autoreleasepool here
+	// TODO and what do we do now? it's a bit too tricky to use @autoreleasepool here id:5 gh:6
 	#error TODO this code should be compiled as C for now
 	#else
 	//would be nice to use objc_autoreleasePoolPush instead, but it's not publically available in the headers
@@ -3092,7 +3092,7 @@ Tigr *tigrWindow(int w, int h, const char *title, int flags)
 	id blackColor = objc_msgSend_id((id)objc_getClass("NSColor"), sel_registerName("blackColor"));
 	objc_msgSend_void_id(window, sel_registerName("setBackgroundColor:"), blackColor);
 
-	// TODO do we really need this?
+	// TODO do we really need this? id:6 gh:7
 	objc_msgSend_void_bool(NSApp, sel_registerName("activateIgnoringOtherApps:"), YES);
 
 	// Wrap a bitmap around it.
@@ -3460,7 +3460,7 @@ void _tigrOnCocoaEvent(id event, id window)
 
 		keys.mask = (modifiers & 0xffff0000UL) >> 16;
 
-		// TODO L,R variation of keys?
+		// TODO L,R variation of keys? id:1 gh:2
 		win->keys[TK_CONTROL] = keys.alpha_shift;
 		win->keys[TK_SHIFT] = keys.shift;
 		win->keys[TK_CONTROL] = keys.control;
@@ -3631,7 +3631,7 @@ float tigrTime()
 //////// Start of inlined file: tigr_gl.c ////////
 
 //#include "tigr_internal.h"
-#include <stdio.h> // TODO can we remove this and printf's later?
+#include <stdio.h> // TODO can we remove this and printf's later? id:4 gh:5
 
 #ifdef TIGR_GAPI_GL
 #ifndef __APPLE__
